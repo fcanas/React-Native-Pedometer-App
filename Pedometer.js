@@ -1,36 +1,30 @@
+var RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
+var FFCPedometer = require('NativeModules').FFCPedometer;
+
+var listener;
+
 var Pedometer = {
-  isStepCountingAvailable: function() {
-    return true;
+  isStepCountingAvailable: function(callback) {
+    callback(null, true);
   },
-  isDistanceAvailable: function() {
-    return true;
+  isDistanceAvailable: function(callback) {
+    callback(null, true);
   },
-  isFloorCountingAvailable: function() {
-    return true;
+  isFloorCountingAvailable: function(callback) {
+    callback(null, true);
   },
 
   startPedometerUpdatesFromDate: function(date, handler) {
-    handler(null, {
-      startDate: date,
-      endDate: date,
-      numberOfSteps: 12,
-      distance: 8,
-      floorsAscended: 1,
-      floorsDescended: 0,
-    });
-
-    setTimeout(function(){
-      handler(null, {
-        startDate: date,
-        endDate: date,
-        numberOfSteps: 30,
-        distance: 15,
-        floorsAscended: 1,
-        floorsDescended: 0,
-      });
-    }, 5000);
+    FFCPedometer.startPedometerUpdatesFromDate(date);
+    listener = RCTDeviceEventEmitter.addListener(
+      'pedometerDataDidUpdate',
+      handler
+    );
   },
-  stopPedometerUpdates: function () { },
+  stopPedometerUpdates: function () {
+    FFCPedometer.stopPedometerUpdates();
+    listener = null;
+  },
 
   queryPedometerDataBetweenDates: function(startDate, endDate, handler) {
     handler(null, {

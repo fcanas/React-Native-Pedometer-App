@@ -50,7 +50,10 @@ var Pedometer = React.createClass({
   },
 
   startUpdates: function () {
-    CMPedometer.startPedometerUpdatesFromDate(null, function (error, motionData) {
+    var today = new Date();
+    today.setHours(0,0,0,0);
+
+    CMPedometer.startPedometerUpdatesFromDate(today, function (motionData) {
       console.log("motionData: " + motionData);
       this.setState(motionData);
     }.bind(this));

@@ -53,20 +53,23 @@ also takes a completion handler of the same form as the live data callback.
 
 We'll start by making a `Pedometer.js` with a root `Pedometer` object that we
 export as a module. And we'll add some of the method stubs. The availability
-stubs are simple.
+stubs are simple. Something that might stand out here is that we're going to
+return availability through a callback. That's because, as far as I can tell,
+native calls can only return data through a callback, even if the value might be
+available immediately. Additionally, the callbacks all return `null` as a first
+parameter because it's for returning errors by convention.
 
 ```js
 var Pedometer = {
-  isStepCountingAvailable: function() {
-    return true;
+  isStepCountingAvailable: function(callback) {
+    callback(null, true);
   },
-  isDistanceAvailable: function() {
-    return true;
+  isDistanceAvailable: function(callback) {
+    callback(null, true);
   },
-  isFloorCountingAvailable: function() {
-    return true;
+  isFloorCountingAvailable: function(callback) {
+    callback(null, true);
   },
-  stopPedometerUpdates: function () { },
 };
 
 module.exports = Pedometer;
@@ -188,4 +191,181 @@ startUpdates: function () {
     this.setState(motionData);
   }.bind(this));
 },
+```
+
+### Native Module
+
+Now we can start writing our native module. We do this in Objective-C. React has
+put a lot of work into creating preprocessor macros that massage Objective-C
+classes into a form that makes them bridge into javascript as well as conform to
+React's conventions. While it is likely it is possible to write these components
+in Swift -- and Swift may seem appealing to you as JavaScript developers, it's
+simply not a good idea to attempt that approach today unless you're already
+well-versed in Swift and Objective-C.
+
+We start by making a new `FFCPedometer` class that conforms to `RCTBridgeModule`.
+
+```objc
+#import "RCTBridgeModule.h"
+
+@interface FFCPedometer : NSObject <RCTBridgeModule>
+
+@end
+```
+
+And we add methods implementing what we need. We export the class as a module,
+add availability methods, and a query updating method that uses a callback.
+A few notable notable but minor additions beyond those methods. First creating
+an keeping a `CMPedometer`, that is, the pedometer object provided by the system
+frameworks that we're wrapping. And also a convenience method to convert
+`CMPedometerData` into a JSON-compatible dictionary.
+
+One substantial consideration here is that callbacks that are bridged to
+Objective-C are only intended to be called once. This lets us use a callback for
+the query method, but not for our `start` method.
+
+The approach other areas of React Native take to callbacks that need to be
+called more than once is to use a global event dispatcher. In javascript, you
+register a function with a string key that gets called with a passed object when
+that global signal is triggered:
+
+```js
+startPedometerUpdatesFromDate: function(date, handler) {
+  FFCPedometer.startPedometerUpdatesFromDate(date);
+  listener = RCTDeviceEventEmitter.addListener(
+    'pedometerDataDidUpdate',
+    handler
+  );
+},
+```
+
+On the Objective-C side, we get a reference to the bridge's event dispatcher and
+send a message with the pedometer data across the bridge.
+
+```objc
+#import "RCTBridge.h"
+#import "RCTEventDispatcher.h"
+
+@interface FFCPedometer ()
+@property (nonatomic, readonly) CMPedometer *pedometer;
+@end
+
+@implementation FFCPedometer
+
+RCT_EXPORT_MODULE()
+
+RCT_EXPORT_METHOD(isStepCountingAvailable:(RCTResponseSenderBlock) callback) {
+  callback(@[NullErr, @([CMPedometer isStepCountingAvailable])]);
+}
+
+RCT_EXPORT_METHOD(isFloorCountingAvailable:(RCTResponseSenderBlock) callback) {
+  callback(@[NullErr, @([CMPedometer isFloorCountingAvailable])]);
+}
+
+RCT_EXPORT_METHOD(isDistanceAvailable:(RCTResponseSenderBlock) callback) {
+  callback(@[NullErr, @([CMPedometer isDistanceAvailable])]);
+}
+RCT_EXPORT_METHOD(queryPedometerDataBetweenDates:(NSDate *)startDate endDate:(NSDate *)endDate handler:(RCTResponseSenderBlock)handler) {
+  [self.pedometer queryPedometerDataFromDate:startDate
+                                      toDate:endDate
+                                 withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+                                   handler(@[error.description?:NullErr, [self dictionaryFromPedometerData:pedometerData]]);
+                                 }];
+}
+
+RCT_EXPORT_METHOD(startPedometerUpdatesFromDate:(NSDate *)date) {
+  [self.pedometer startPedometerUpdatesFromDate:date?:[NSDate date]
+                                    withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+                                      if (pedometerData) {
+                                        [[self.bridge eventDispatcher] sendDeviceEventWithName:@"pedometerDataDidUpdate" body:[self dictionaryFromPedometerData:pedometerData]];
+                                      }
+                                    }];
+}
+
+RCT_EXPORT_METHOD(stopPedometerUpdates) {
+  [self.pedometer stopPedometerUpdates];
+}
+
+#pragma mark - Private
+
+- (NSDictionary *)dictionaryFromPedometerData:(CMPedometerData *)data {
+
+  static NSDateFormatter *formatter;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    formatter = [[NSDateFormatter alloc] init];
+    formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ";
+    formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+    formatter.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+  });
+  return @{
+
+           @"startDate": [formatter stringFromDate:data.startDate]?:NullErr,
+           @"endDate": [formatter stringFromDate:data.endDate]?:NullErr,
+           @"numberOfSteps": data.numberOfSteps?:NullErr,
+           @"distance": data.distance?:NullErr,
+           @"floorsAscended": data.floorsAscended?:NullErr,
+           @"floorsDescended": data.floorsDescended?:NullErr,
+           };
+}
+
+- (instancetype)init
+{
+  self = [super init];
+  if (self == nil) {
+    return nil;
+  }
+
+  _pedometer = [CMPedometer new];
+
+  return self;
+}
+
+@end
+```
+
+And the full JavaScript module:
+
+```js
+var RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
+var FFCPedometer = require('NativeModules').FFCPedometer;
+
+var listener;
+
+var Pedometer = {
+  isStepCountingAvailable: function(callback) {
+    callback(null, true);
+  },
+  isDistanceAvailable: function(callback) {
+    callback(null, true);
+  },
+  isFloorCountingAvailable: function(callback) {
+    callback(null, true);
+  },
+
+  startPedometerUpdatesFromDate: function(date, handler) {
+    FFCPedometer.startPedometerUpdatesFromDate(date);
+    listener = RCTDeviceEventEmitter.addListener(
+      'pedometerDataDidUpdate',
+      handler
+    );
+  },
+  stopPedometerUpdates: function () {
+    FFCPedometer.stopPedometerUpdates();
+    listener = null;
+  },
+
+  queryPedometerDataBetweenDates: function(startDate, endDate, handler) {
+    handler(null, {
+      'startDate': startDate,
+      'endDate': endDate,
+      numberOfSteps: 12,
+      distance: 8,
+      floorsAscended: 1,
+      floorsDescended: 0,
+    });
+  },
+};
+
+module.exports = Pedometer;
 ```
