@@ -12,19 +12,20 @@ var {
   View,
 } = React;
 
+var stepCount = 1;
+
 var Pedometer = React.createClass({
   render: function() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
+        <Text style={styles.largeNotice}>
+          {stepCount}
+        </Text>
+        <Text style={styles.status}>
+          You have walked {stepCount} step{stepCount==1?'':'s'} today.
         </Text>
         <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+D or shake for dev menu
+          Just keep your phone in your pocket and go for a walk!
         </Text>
       </View>
     );
@@ -38,7 +39,12 @@ var styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  welcome: {
+  largeNotice: {
+    fontSize: 70,
+    textAlign: 'center',
+    margin: 30,
+  },
+  status: {
     fontSize: 20,
     textAlign: 'center',
     margin: 10,
