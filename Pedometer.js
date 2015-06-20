@@ -18,6 +18,17 @@ var Pedometer = {
       floorsAscended: 1,
       floorsDescended: 0,
     });
+
+    setTimeout(function(){
+      handler(null, {
+        startDate: date,
+        endDate: date,
+        numberOfSteps: 30,
+        distance: 15,
+        floorsAscended: 1,
+        floorsDescended: 0,
+      });
+    }, 5000);
   },
   stopPedometerUpdates: function () { },
 

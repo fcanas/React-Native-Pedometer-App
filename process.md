@@ -92,7 +92,9 @@ model class:
 
 So we can fill out those functions to call the handler with sample data. We are
 also going to use React's convention, adopted from node, for the first parameter
-to be an error.
+to be an error. To help illustrate React's power of keeping views up-to-date
+with changing data, we'll make our `startPedometerUpdatesFromDate` function call
+the handler twice in succession with updated data.
 
 ```js
 startPedometerUpdatesFromDate: function(date, handler) {
@@ -104,6 +106,17 @@ startPedometerUpdatesFromDate: function(date, handler) {
     floorsAscended: 1,
     floorsDescended: 0,
   });
+
+  setTimeout(function(){
+    handler(null, {
+      startDate: date,
+      endDate: date,
+      numberOfSteps: 30,
+      distance: 15,
+      floorsAscended: 1,
+      floorsDescended: 0,
+    });
+  }, 5000);
 },
 stopPedometerUpdates: function () { },
 
@@ -116,5 +129,63 @@ queryPedometerDataBetweenDates: function(startDate, endDate, handler) {
     floorsAscended: 1,
     floorsDescended: 0,
   });
+},
+```
+
+### Connecting the Stubs to the App
+
+In our App's main implementation, we need to import our new module:
+
+```js
+var CMPedometer = require('./Pedometer');
+```
+
+We then update our template to render itself using value from its `state` member
+and provide an implementation of `getInitialState` to provide reasonable initial
+values.
+
+```js
+render: function() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.largeNotice}>
+        {this.state.numberOfSteps}
+      </Text>
+      <Text style={styles.status}>
+        You walked {this.state.numberOfSteps} step{this.state.numberOfSteps==1?'':'s'}.
+      </Text>
+      <Text style={styles.instructions}>
+        Just keep your phone in your pocket and go for a walk!
+      </Text>
+    </View>
+  );
+},
+
+getInitialState: function () {
+  return {
+    startDate: null,
+    endDate: null,
+    numberOfSteps: 0,
+    distance: 0,
+    floorsAscended: 0,
+    floorsDescended: 0,
+  }
+},
+```
+
+Then we want to start fetching updates from our pedometer data when the
+component loads. And in our handler, we will update the component's state, which
+will in turn re-render our view for us.
+
+```js
+componentDidMount: function () {
+  this.startUpdates();
+},
+
+startUpdates: function () {
+  CMPedometer.startPedometerUpdatesFromDate(null, function (error, motionData) {
+    console.log("motionData: " + motionData);
+    this.setState(motionData);
+  }.bind(this));
 },
 ```

@@ -5,6 +5,8 @@
 'use strict';
 
 var React = require('react-native');
+var CMPedometer = require('./Pedometer');
+
 var {
   AppRegistry,
   StyleSheet,
@@ -12,24 +14,48 @@ var {
   View,
 } = React;
 
-var stepCount = 1;
-
 var Pedometer = React.createClass({
   render: function() {
     return (
       <View style={styles.container}>
         <Text style={styles.largeNotice}>
-          {stepCount}
+          {this.state.numberOfSteps}
         </Text>
         <Text style={styles.status}>
-          You have walked {stepCount} step{stepCount==1?'':'s'} today.
+          You walked {this.state.numberOfSteps} step{this.state.numberOfSteps==1?'':'s'}, or about {this.state.distance} meters.
+          </Text>
+          <Text style={styles.status}>
+          You went up {this.state.floorsAscended} floor{this.state.floorsAscended==1?'':'s'}, and down {this.state.floorsDescended}.
         </Text>
         <Text style={styles.instructions}>
           Just keep your phone in your pocket and go for a walk!
         </Text>
       </View>
     );
-  }
+  },
+
+  getInitialState: function () {
+    return {
+      startDate: null,
+      endDate: null,
+      numberOfSteps: 0,
+      distance: 0,
+      floorsAscended: 0,
+      floorsDescended: 0,
+    }
+  },
+
+  componentDidMount: function () {
+    this.startUpdates();
+  },
+
+  startUpdates: function () {
+    CMPedometer.startPedometerUpdatesFromDate(null, function (error, motionData) {
+      console.log("motionData: " + motionData);
+      this.setState(motionData);
+    }.bind(this));
+  },
+
 });
 
 var styles = StyleSheet.create({
@@ -52,6 +78,7 @@ var styles = StyleSheet.create({
   instructions: {
     textAlign: 'center',
     color: '#333333',
+    marginTop: 15,
     marginBottom: 5,
   },
 });
