@@ -1091,91 +1091,94 @@ __d('Pedometer/index.ios',["react-native/Libraries/react-native/react-native","P
  * Sample React Native App
  * https://github.com/facebook/react-native
  */
-'use strict';
+(function() {
+  'use strict';
 
-var React = require('react-native/Libraries/react-native/react-native');
-var CMPedometer = require('Pedometer/Pedometer');
+  var React = require('react-native/Libraries/react-native/react-native');
+  var CMPedometer = require('Pedometer/Pedometer');
 
-var $__0=
-  
-  
-  
-  
-  React,AppRegistry=$__0.AppRegistry,StyleSheet=$__0.StyleSheet,Text=$__0.Text,View=$__0.View;
+  var $__0=
+    
+    
+    
+    
+    React,AppRegistry=$__0.AppRegistry,StyleSheet=$__0.StyleSheet,Text=$__0.Text,View=$__0.View;
 
-var Pedometer = React.createClass({displayName: "Pedometer",
-  render: function() {
-    return (
-      React.createElement(View, {style: styles.container}, 
-        React.createElement(Text, {style: styles.largeNotice}, 
-          this.state.numberOfSteps
-        ), 
-        React.createElement(Text, {style: styles.status}, 
-          "You walked ", this.state.numberOfSteps, " step", this.state.numberOfSteps==1?'':'s', ", or about ", this.state.distance, " meters."
+  var Pedometer = React.createClass({displayName: "Pedometer",
+    render: function() {
+      return (
+        React.createElement(View, {style: styles.container}, 
+          React.createElement(Text, {style: styles.largeNotice}, 
+            this.state.numberOfSteps
           ), 
           React.createElement(Text, {style: styles.status}, 
-          "You went up ", this.state.floorsAscended, " floor", this.state.floorsAscended==1?'':'s', ", and down ", this.state.floorsDescended, "."
-        ), 
-        React.createElement(Text, {style: styles.instructions}, 
-          "Just keep your phone in your pocket and go for a walk!"
+            "You walked ", this.state.numberOfSteps, " step", this.state.numberOfSteps==1?'':'s', ", or about ", this.state.distance, " meters."
+            ), 
+            React.createElement(Text, {style: styles.status}, 
+            "You went up ", this.state.floorsAscended, " floor", this.state.floorsAscended==1?'':'s', ", and down ", this.state.floorsDescended, "."
+          ), 
+          React.createElement(Text, {style: styles.instructions}, 
+            "Just keep your phone in your pocket and go for a walk!"
+          )
         )
-      )
-    );
-  },
+      );
+    },
 
-  getInitialState: function () {
-    return {
-      startDate: null,
-      endDate: null,
-      numberOfSteps: 0,
-      distance: 0,
-      floorsAscended: 0,
-      floorsDescended: 0,
-    }
-  },
+    getInitialState: function () {
+      return {
+        startDate: null,
+        endDate: null,
+        numberOfSteps: 0,
+        distance: 0,
+        floorsAscended: 0,
+        floorsDescended: 0,
+      }
+    },
 
-  componentDidMount: function () {
-    this.startUpdates();
-  },
+    componentDidMount: function () {
+      this.startUpdates();
+    },
 
-  startUpdates: function () {
-    var today = new Date();
-    today.setHours(0,0,0,0);
+    startUpdates: function () {
+      var today = new Date();
+      today.setHours(0,0,0,0);
 
-    CMPedometer.startPedometerUpdatesFromDate(today, function (motionData) {
-      console.log("motionData: " + motionData);
-      this.setState(motionData);
-    }.bind(this));
-  },
+      CMPedometer.startPedometerUpdatesFromDate(today, function (motionData) {
+        console.log("motionData: " + motionData);
+        this.setState(motionData);
+      }.bind(this));
+    },
 
-});
+  });
 
-var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  largeNotice: {
-    fontSize: 70,
-    textAlign: 'center',
-    margin: 30,
-  },
-  status: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginTop: 15,
-    marginBottom: 5,
-  },
-});
+  var styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#F5FCFF',
+    },
+    largeNotice: {
+      fontSize: 70,
+      textAlign: 'center',
+      margin: 30,
+    },
+    status: {
+      fontSize: 20,
+      textAlign: 'center',
+      margin: 10,
+    },
+    instructions: {
+      textAlign: 'center',
+      color: '#333333',
+      marginTop: 15,
+      marginBottom: 5,
+    },
+  });
 
-AppRegistry.registerComponent('Pedometer', function()  {return Pedometer;});
+  AppRegistry.registerComponent('Pedometer', function()  {return Pedometer;});
+})();
+
 });
 __d('react-native/Libraries/react-native/react-native',["React","ActivityIndicatorIOS","DatePickerIOS","Image","ListView","MapView","NavigatorIOS","PickerIOS","Navigator","SegmentedControlIOS","ScrollView","SliderIOS","SwitchIOS","TabBarIOS","Text","TextInput","TouchableHighlight","TouchableOpacity","TouchableWithoutFeedback","View","WebView","AlertIOS","AppRegistry","AppStateIOS","AsyncStorage","CameraRoll","InteractionManager","LinkingIOS","LayoutAnimation","NetInfo","PixelRatio","PushNotificationIOS","PanResponder","StatusBarIOS","StyleSheet","VibrationIOS","RCTDeviceEventEmitter","RCTNativeAppEventEmitter","NativeModules","requireNativeComponent","LinkedStateMixin","ReactComponentWithPureRenderMixin","NativeModules","ReactUpdates","cloneWithProps","ReactFragment","update","ReactDefaultPerf","ReactTestUtils"],function(global, require, requireDynamic, requireLazy, module, exports) {  /**
  * Copyright (c) 2015-present, Facebook, Inc.
