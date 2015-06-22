@@ -5,13 +5,13 @@ var listener;
 
 var Pedometer = {
   isStepCountingAvailable: function(callback) {
-    callback(null, true);
+    FFCPedometer.isStepCountingAvailable(callback);
   },
   isDistanceAvailable: function(callback) {
-    callback(null, true);
+    FFCPedometer.isDistanceAvailable(callback);
   },
   isFloorCountingAvailable: function(callback) {
-    callback(null, true);
+    FFCPedometer.isFloorCountingAvailable(callback);
   },
 
   startPedometerUpdatesFromDate: function(date, handler) {
@@ -27,14 +27,7 @@ var Pedometer = {
   },
 
   queryPedometerDataBetweenDates: function(startDate, endDate, handler) {
-    handler(null, {
-      'startDate': startDate,
-      'endDate': endDate,
-      numberOfSteps: 12,
-      distance: 8,
-      floorsAscended: 1,
-      floorsDescended: 0,
-    });
+    FFCPedometer.queryPedometerDataBetweenDates(startDate, endDate, handler);
   },
 };
 
