@@ -234,7 +234,7 @@ fetchData: function() {
   },
 ```
 
-![right  fit](https://raw.githubusercontent.com/fcanas/React-Native-Pedometer/presentation/Presentation/images/dom-diff.png)
+![right  fit](https://raw.githubusercontent.com/fcanas/React-Native-Pedometer/master/Presentation/images/dom-diff.png)
 
 ---
 
@@ -274,7 +274,7 @@ fetchData: function() {
   },
 ```
 
-![right fit](https://raw.githubusercontent.com/fcanas/React-Native-Pedometer/presentation/Presentation/images/view-diff.png)
+![right fit](https://raw.githubusercontent.com/fcanas/React-Native-Pedometer/master/Presentation/images/view-diff.png)
 
 ---
 
@@ -331,6 +331,15 @@ We are using native views after all. But we're also given access to the network,
 
 # Native API : **`CMPedometer`**
 
+### Unavailable in React Native
+
+# _
+
+# [fit]:frowning:
+
+---
+# Native API : **`CMPedometer`**
+
 ## Determining Pedometer Availability
 * `+ isStepCountingAvailable`
 * `+ isDistanceAvailable`
@@ -357,8 +366,6 @@ We are using native views after all. But we're also given access to the network,
 
 ---
 
-# JS Stub
-
 ^ I'm going to start by making stubs for the JavaScript interface we want to be able to use in the app.
 
 
@@ -380,9 +387,7 @@ module.exports = Pedometer;
 
 ---
 
-# JS Stub
-
-^ the start updating function, I'm going to stub in calling the handler twice
+^ the start updating function
 
 ^ and the stop function can be empty for now.
 
@@ -396,24 +401,11 @@ startPedometerUpdatesFromDate: function(date, handler) {
     floorsAscended: 1,
     floorsDescended: 0,
   });
-
-  setTimeout(function(){
-    handler({
-      startDate: date,
-      endDate: date,
-      numberOfSteps: 30,
-      distance: 15,
-      floorsAscended: 1,
-      floorsDescended: 0,
-    });
-  }, 5000);
 },
 stopPedometerUpdates: function () { },
 ```
 
 ---
-
-# JS Stub
 
 ^ and we'll throw in the qury function for completeness
 
@@ -437,7 +429,9 @@ queryPedometerDataBetweenDates: function(startDate, endDate, handler) {
 ^So we write our react Component
 
 ```js
-var Pedometer = React.createClass({
+var Pedometer = require('./Pedometer');
+
+var PedometerApp = React.createClass({
   render: function() {
     return (
       <View style={styles.container}>
@@ -470,9 +464,17 @@ var Pedometer = React.createClass({
 
 ^ with a couple of inititialization pieces, and we kick off the pedometer when the component mounts.
 
-# React
-
 ```js
+componentDidMount: function () {
+  var today = new Date();
+  today.setHours(0,0,0,0);
+
+  Pedometer.startPedometerUpdatesFromDate(today, function(motionData){
+    console.log("motionData: " + motionData);
+    this.setState(motionData);
+  }.bind(this));
+},
+
 getInitialState: function () {
   return {
     startDate: null,
@@ -482,20 +484,6 @@ getInitialState: function () {
     floorsAscended: 0,
     floorsDescended: 0,
   }
-},
-
-componentDidMount: function () {
-  this.startUpdates();
-},
-
-startUpdates: function () {
-  var today = new Date();
-  today.setHours(0,0,0,0);
-
-  CMPedometer.startPedometerUpdatesFromDate(today, function (motionData) {
-    console.log("motionData: " + motionData);
-    this.setState(motionData);
-  }.bind(this));
 },
 ```
 
@@ -553,6 +541,26 @@ RCT_EXPORT_MODULE()
 
 * Export methods we want to be made available.
 
+^ we can take a look at a simple one:
+
+
+```c
+RCT_EXPORT_METHOD(isStepCountingAvailable:(RCTResponseSenderBlock) callback) {
+  callback(@[NullErr, @([CMPedometer isStepCountingAvailable])]);
+}
+```
+
+becomes
+
+```objc
+- (void)isStepCountingAvailable:(RCTResponseSenderBlock) callback {
+  callback(@[NullErr, @([CMPedometer isStepCountingAvailable])]);
+}
+```
+
+---
+
+
 ```objc
 RCT_EXPORT_METHOD(isStepCountingAvailable:(RCTResponseSenderBlock) callback) {
   callback(@[NullErr, @([CMPedometer isStepCountingAvailable])]);
@@ -574,14 +582,19 @@ RCT_EXPORT_METHOD(queryPedometerDataBetweenDates:(NSDate *)startDate endDate:(NS
 }
 ```
 
+
+
 ---
 
-# Bridging in Objective-C
+# Continuous Updates
 
 * Callbacks: only intended to be called once
+
 * Use `RCTBridge` as a message bus
 
 ^ So instead of taking a callback, this method just takes the start date, and we use a named bus to send updates over.
+
+---
 
 ```objc
 RCT_EXPORT_METHOD(startPedometerUpdatesFromDate:(NSDate *)date) {
@@ -597,6 +610,22 @@ RCT_EXPORT_METHOD(startPedometerUpdatesFromDate:(NSDate *)date) {
 
 RCT_EXPORT_METHOD(stopPedometerUpdates) {
   [self.pedometer stopPedometerUpdates];
+}
+```
+
+---
+
+Convert CMPedometerData ObjC object to a Bridgeable structure.
+
+```objc
+- (NSDictionary *)dictionaryFromPedometerData:(CMPedometerData *)data {
+  return @{@"startDate": data.startDate?:NullErr,
+           @"endDate": data.endDate?:NullErr,
+           @"numberOfSteps": data.numberOfSteps?:NullErr,
+           @"distance": data.distance?:NullErr,
+           @"floorsAscended": data.floorsAscended?:NullErr,
+           @"floorsDescended": data.floorsDescended?:NullErr,
+           };
 }
 ```
 
@@ -672,3 +701,6 @@ stopPedometerUpdates: function () {
 ---
 
 # [fit]?
+
+
+### @fcanas — https://github.com/fcanas/React-Native-Pedometer
