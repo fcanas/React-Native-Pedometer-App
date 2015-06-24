@@ -5,11 +5,11 @@
 
 ![original 60%](https://mojotech-static.s3.amazonaws.com/m4/toolkit/images/brand/logos/mojo_full_logo_green.png)
 
-^ welcome to MojoTech. I work here as a native iOS developer.
+^ Welcome to MojoTech. I work here as a native iOS developer.
 
 ---
 
-^ which means I spend my time writing swift and objective-c, not JavaScript.
+^ which means I spend my time writing Swift and Objective-C, not JavaScript.
 
 ![left 100%](https://developer.apple.com/assets/elements/icons/128x128/swift_2x.png)
 
@@ -20,9 +20,8 @@
 ## [fit]Writing Native Modules for
 # [fit]React Native
 
-^ Today's talk is about React Native modules --
+^ Today's talk is about ...
 ^ which means I think we need to go over a little context to undersand ::::
-
 
 ---
 
@@ -33,18 +32,17 @@
 
 ---
 
-^ Then React Native
+^ Then _React Native_
 
 ## [fit]~~Writing Native Modules for~~
 # [fit]**React Native**
-
 
 ---
 
 ## [fit]**Writing Native Modules for**
 # [fit]**React Native**
 
-^ before really diving into native modules
+^ before diving into native modules, what they are, why you'd want them, and how to make them.
 
 ---
 
@@ -54,7 +52,7 @@
 
 # React
 
-^ React is a Javascript UI library introduced by facebook --
+^ React is a JavaScript UI library introduced by Facebook --
 
 * JavaScript UI Library
 * Simplify Apps where data changes over time
@@ -80,7 +78,7 @@
 
 # React
 
-^ Let's take a brief look at a web example from facbook.
+^ Let's take a brief look at a web example from Facebook.
 ^ we make a component called "HelloWorld" and define its content in terms of its properties
 
 ^ then elsewhere in the app, probably not in a `setInterval`, we set the data on the object and render it into the document.
@@ -138,7 +136,7 @@ setInterval(function() {
 
 ---
 
-^ I'm not necessarily advocating you use React. Facebook is. It's working well for them. The most interesting thing to me abotu React is that Facebook developed some tooling called React Native.
+^ I'm not necessarily advocating you use React. Facebook is. It's working well for them. The most interesting thing to me about React is that Facebook developed some tooling called React Native.
 
 ^ next:::
 #### That's cool. What's
@@ -158,7 +156,7 @@ setInterval(function() {
 
 ---
 
-## React Navtive
+## React Native
 
 # [fit]~~Web Apps on iOS~~
 
@@ -167,7 +165,7 @@ setInterval(function() {
 
 ---
 
-## React Navtive
+## React Native
 
 # [fit]Write JavaScript
 ## JSX tags `=>` Native components
@@ -195,7 +193,7 @@ setInterval(function() {
 
 ---
 
-^ Whe you write a React app, you're really just a JavaScript app running over here on the left poking changes into a virtual DOM.
+^ When you write a React app, you're really just a JavaScript app running over here on the left poking changes into a virtual DOM.
 
 ^ There's some great tools and conventions over there.
 
@@ -298,7 +296,7 @@ fetchData: function() {
 
 ----
 
-^ Not so fast. We need to acknowledge that a lot of React Native is built wth native components.
+^ Not so fast. We need to acknowledge that a lot of React Native is built with native components.
 We are using native views after all. But we're also given access to the network, hardware, etc. And just like in a browser, those things are written natively.
 
 # Built-In Native Modules
@@ -360,9 +358,9 @@ We are using native views after all. But we're also given access to the network,
 
 ^ You're about to see some JavaScript I wrote...
 
-^ Please forgive me: I don't write JS. The result of this exercise is published on GitHub, and as I package it up for release as a Native Module, I hope to get pull requests fixing my attrocious JS.
+^ Please forgive me: I don't write JS. The result of this exercise is published on GitHub, and as I package it up for release as a Native Module, I hope to get pull requests fixing my atrocious JS.
 
-^ And hopfully as I get further into writing React Native apps, I'll pick up on the conventions and write more beatiful JS.
+^ And hopefully as I get further into writing React Native apps, I'll pick up on the conventions and write more beautiful JS.
 
 ---
 
@@ -407,7 +405,7 @@ stopPedometerUpdates: function () { },
 
 ---
 
-^ and we'll throw in the qury function for completeness
+^ and we'll throw in the query function for completeness
 
 ```js
 queryPedometerDataBetweenDates: function(startDate, endDate, handler) {
@@ -462,7 +460,7 @@ var PedometerApp = React.createClass({
 
 ---
 
-^ with a couple of inititialization pieces, and we kick off the pedometer when the component mounts.
+^ with a couple of initialization pieces, and we kick off the pedometer when the component mounts.
 
 ```js
 componentDidMount: function () {
@@ -516,7 +514,7 @@ getInitialState: function () {
 
 ---
 
-# Briding in Objective-C
+# Bridging in Objective-C
 
 * Define our class
 * Export our class as a module
