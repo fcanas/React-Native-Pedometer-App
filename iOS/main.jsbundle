@@ -41544,40 +41544,30 @@ module.exports = ReactTestUtils;
 __d('Pedometer/Pedometer',["RCTDeviceEventEmitter","NativeModules"],function(global, require, requireDynamic, requireLazy, module, exports) {  var RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
 var FFCPedometer = require('NativeModules').FFCPedometer;
 
-var listener;
-
 var Pedometer = {
   isStepCountingAvailable: function(callback) {
-    callback(null, true);
+    FFCPedometer.isStepCountingAvailable(callback);
   },
   isDistanceAvailable: function(callback) {
-    callback(null, true);
+    FFCPedometer.isDistanceAvailable(callback);
   },
   isFloorCountingAvailable: function(callback) {
-    callback(null, true);
+    FFCPedometer.isFloorCountingAvailable(callback);
   },
 
   startPedometerUpdatesFromDate: function(date, handler) {
     FFCPedometer.startPedometerUpdatesFromDate(date);
-    listener = RCTDeviceEventEmitter.addListener(
+    RCTDeviceEventEmitter.addListener(
       'pedometerDataDidUpdate',
       handler
     );
   },
   stopPedometerUpdates: function () {
     FFCPedometer.stopPedometerUpdates();
-    listener = null;
   },
 
   queryPedometerDataBetweenDates: function(startDate, endDate, handler) {
-    handler(null, {
-      'startDate': startDate,
-      'endDate': endDate,
-      numberOfSteps: 12,
-      distance: 8,
-      floorsAscended: 1,
-      floorsDescended: 0,
-    });
+    FFCPedometer.queryPedometerDataBetweenDates(startDate, endDate, handler);
   },
 };
 

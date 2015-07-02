@@ -1,8 +1,6 @@
 var RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
 var FFCPedometer = require('NativeModules').FFCPedometer;
 
-var listener;
-
 var Pedometer = {
   isStepCountingAvailable: function(callback) {
     FFCPedometer.isStepCountingAvailable(callback);
@@ -16,14 +14,13 @@ var Pedometer = {
 
   startPedometerUpdatesFromDate: function(date, handler) {
     FFCPedometer.startPedometerUpdatesFromDate(date);
-    listener = RCTDeviceEventEmitter.addListener(
+    RCTDeviceEventEmitter.addListener(
       'pedometerDataDidUpdate',
       handler
     );
   },
   stopPedometerUpdates: function () {
     FFCPedometer.stopPedometerUpdates();
-    listener = null;
   },
 
   queryPedometerDataBetweenDates: function(startDate, endDate, handler) {
